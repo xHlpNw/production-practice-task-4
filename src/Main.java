@@ -1,4 +1,6 @@
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -7,7 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalAccessException {
         // Работа с лямбда-выражениями
         // 1. Лямбда выражение для интерфейса Printable
         // Написать лямбда выражение для интерфейса Printable, который содержит один метод void print().
@@ -133,6 +135,17 @@ public class Main {
         //       Принимает любой объект.
         //       Через рефлексию находит все поля, помеченные @JsonField.
         //       Формирует строку JSON формата: {"jsonName1": значение, "jsonName2": значение, ...}
+        System.out.println("\nЗадание 2:");
+        SerializableClass object = new SerializableClass();
+        System.out.println(object);
+        System.out.println(Serializer.toJson(object));
+
+        object = new SerializableClass(21, "Pavel", 'S', 80.21212,
+                new ArrayList<>(List.of(5, 4, 5, 3, 5)));
+        System.out.println(object);
+        System.out.println(Serializer.toJson(object));
+        System.out.println(box);
+        System.out.println(Serializer.toJson(box));
     }
     public static void processClass(Class<?> cls) {
         System.out.printf("Обработка класса '%s':\n", cls.getSimpleName());
@@ -166,7 +179,6 @@ public class Main {
                 }
             }
         }
-        if (!hasMarks) System.out.printf("Не было найдено устаревших методов и классов.\n",
-                cls.getSimpleName());
+        if (!hasMarks) System.out.println("Не было найдено устаревших методов и классов.");
     }
 }
