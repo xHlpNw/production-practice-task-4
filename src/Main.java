@@ -1,20 +1,4 @@
-/*
-
-
-Задание 2: Кастомная сериализация в JSON с аннотацией @JsonField ***
-Создайте аннотацию @JsonField, чтобы указывать имя поля в JSON-выводе.
-Требования:
-    Аннотация применяется к полям.
-    Аннотация содержит параметр name(), задающий имя поля в JSON.
-Реализуйте класс-сериализатор, который:
-    Принимает любой объект.
-    Через рефлексию находит все поля, помеченные @JsonField.
-    Формирует строку JSON формата:
-        {"jsonName1": значение, "jsonName2": значение, ...}
-*/
-
-import org.w3c.dom.ls.LSOutput;
-
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -27,6 +11,7 @@ public class Main {
         // Работа с лямбда-выражениями
         // 1. Лямбда выражение для интерфейса Printable
         // Написать лямбда выражение для интерфейса Printable, который содержит один метод void print().
+        System.out.println("Лямбда-выражения");
         System.out.println("Задание 1:");
         Printable printable = () -> System.out.println("Реализация интерфейса Printable");
         printable.print();
@@ -132,5 +117,56 @@ public class Main {
         //    Выводит в консоль предупреждение в формате:
         //       Внимание: метод 'methodName' устарел. Альтернатива: 'message'
         //       Внимание: класс 'ClassName' устарел. Альтернатива: 'message'
+        System.out.println("\nАннотации и рефлексия");
+        System.out.println("Задание 1:");
+        Class<?> cls = DeprecatedClass.class;
+        processClass(cls);
+        System.out.println();
+        processClass(Integer.class);
+
+        // Задание 2: Кастомная сериализация в JSON с аннотацией @JsonField ***
+        // Создайте аннотацию @JsonField, чтобы указывать имя поля в JSON-выводе.
+        // Требования:
+        //    Аннотация применяется к полям.
+        //    Аннотация содержит параметр name(), задающий имя поля в JSON.
+        //    Реализуйте класс-сериализатор, который:
+        //       Принимает любой объект.
+        //       Через рефлексию находит все поля, помеченные @JsonField.
+        //       Формирует строку JSON формата: {"jsonName1": значение, "jsonName2": значение, ...}
+    }
+    public static void processClass(Class<?> cls) {
+        System.out.printf("Обработка класса '%s':\n", cls.getSimpleName());
+        boolean hasMarks = false;
+        if (cls.isAnnotationPresent(DeprecatedEx.class)) {
+            hasMarks = true;
+            DeprecatedEx annotation = cls.getAnnotation(DeprecatedEx.class);
+            System.out.printf("Внимание: класс '%s' устарел. Альтернатива: '%s'\n",
+                    cls.getSimpleName(), annotation.message());
+        }
+
+        for (Method method : cls.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(DeprecatedEx.class)) {
+                hasMarks = true;
+                System.out.printf("Внимание: метод '%s' устарел. Альтернатива: '%s'\n",
+                        method.getName(), method.getAnnotation(DeprecatedEx.class).message());
+            }
+        }
+
+        for (Class<?> inner : cls.getDeclaredClasses()) {
+            if (inner.isAnnotationPresent(DeprecatedEx.class)) {
+                hasMarks = true;
+                System.out.printf("Внимание: внутренний класс '%s' устарел. Альтернатива: '%s'\n",
+                        inner.getSimpleName(), inner.getAnnotation(DeprecatedEx.class).message());
+            }
+            for (Method method : inner.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(DeprecatedEx.class)) {
+                    hasMarks = true;
+                    System.out.printf("Внимание: метод '%s' внутреннего класса '%s' устарел. Альтернатива: '%s'\n",
+                            method.getName(), inner.getSimpleName(), method.getAnnotation(DeprecatedEx.class).message());
+                }
+            }
+        }
+        if (!hasMarks) System.out.printf("Не было найдено устаревших методов и классов.\n",
+                cls.getSimpleName());
     }
 }
